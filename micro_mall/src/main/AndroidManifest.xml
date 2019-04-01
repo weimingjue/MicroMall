@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.glela.micro_mall">
+    <!--打电话-->
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <!-- 读取手机当前状态 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <!-- 外部存储读写 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- 网络定位,GPS定位 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- 摄像 -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!--使用证书,VPN读CA证书有用到,浏览器和其他用DRM的可能也有用到-->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <!--修改声音-->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- 访问,修改wifi网络信息 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- 获取运营商信息 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!--内部存储读写-->
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE"/>
+    <!-- 访问网络-->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!--改变网络-->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <!--获取系统栈信息(谷歌废弃,新版本只能获取到当前的应用信息,见:http://blog.csdn.net/kong92917/article/details/48500343-->
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <!-- 管理账户,读写AccountManager中的账户列表(分享sdk必须) -->
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <!-- 蓝牙(分享sdk必须) -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!--振动-->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!--唤醒屏幕-->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <application>
+        <activity
+            android:name=".activity.GlelaWebActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+    </application>
+
+</manifest>

@@ -1,0 +1,23 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION
+        versionCode 1
+        versionName "1"
+    }
+    buildTypes {
+        不混淆 {
+            initWith debug
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'cn.finalteam:toolsfinal:1.1.4'
+    implementation 'com.android.support:support-v4:'+APPCOMPAT_VERSION
+}

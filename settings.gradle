@@ -1,0 +1,1 @@
+include ':app', ':micro_mall', ':galleryfinal'
