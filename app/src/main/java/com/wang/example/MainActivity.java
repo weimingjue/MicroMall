@@ -15,14 +15,14 @@ public class MainActivity extends AppCompatActivity {
         GlelaWebActivity.toThisActivity(this, "z02", "2yj1zjyklj018ojexwmzes", "21",
                 new GlelaWebActivity.OnWebListener() {
                     @Override
-                    protected void onPay(int payType, String orderSn) {
+                    public void onPay(int payType, String orderSn, GlelaWebActivity.OnThirdResultListener listener) {
                         switch (payType) {
                             case GlelaWebActivity.PAY_ALI://支付宝支付
                                 //...
                                 //当支付成功时传1
-                                onPayResult(payType, 1);
+                                listener.onPayonPayResult(payType, 1);
                                 //当支付失败时传0
-//                        onPayResult(payType, 0);
+                                //listener.onPayonPayResult(payType, 1);
                                 break;
                             case GlelaWebActivity.PAY_WX://微信支付
                                 //...

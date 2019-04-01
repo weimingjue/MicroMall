@@ -61,7 +61,6 @@ public class GlelaWebActivity extends BaseActivity {
      * Destroy时已置null
      */
     private static OnWebListener mGlobalWebListener;
-    private static GlelaWebActivity mGlobalWebActivity;
 
     private String mAppId, mUserId, mCompanyId;
 
@@ -88,7 +87,7 @@ public class GlelaWebActivity extends BaseActivity {
         mIvBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
             }
         });
         mTvTitle.setText("商城");
@@ -113,8 +112,18 @@ public class GlelaWebActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         mGlobalWebListener = null;
-        mGlobalWebActivity = null;
+        ((ViewGroup) mBwv.getParent()).removeView(mBwv);
+        mBwv.destroy();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mBwv.canGoBack()) {
+            mBwv.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     /**
@@ -165,7 +174,16 @@ public class GlelaWebActivity extends BaseActivity {
                 @Override
                 public void run() {
                     int payType = Integer.parseInt(payWay);
-                    if (mGlobalWebListener != null) mGlobalWebListener.onPay(payType, orderSn);
+                    if (mGlobalWebListener != null) {
+                        mGlobalWebListener.onPay(payType, orderSn, new OnThirdResultListener() {
+                            @Override
+                            public void onPayonPayResult(int payType, int status) {
+                                if (mController instanceof GlelaWebActivity) {
+                                    ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
+                                }
+                            }
+                        });
+                    }
                 }
             });
         }
@@ -366,23 +384,17 @@ public class GlelaWebActivity extends BaseActivity {
     // 回调
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static abstract class OnWebListener {
+    public interface OnWebListener {
         /**
-         * @param payType 支付方式，见注解
-         * @param orderSn 订单号，支付的唯一标识
+         * @param payType  支付方式，见注解
+         * @param orderSn  订单号，支付的唯一标识
+         * @param listener 当支付有结果时请调用此方法
          */
-        protected abstract void onPay(@pay int payType, String orderSn);
+        void onPay(@pay int payType, String orderSn, OnThirdResultListener listener);
+    }
 
-        /**
-         * @param status 0支付失败，1成功
-         */
-        protected final void onPayResult(@pay int payType, int status) {
-            if (mGlobalWebActivity == null || mGlobalWebActivity.isFinishing()) {
-                return;
-            }
-
-            mGlobalWebActivity.mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
-        }
+    public interface OnThirdResultListener {
+        void onPayonPayResult(@pay int payType, int status);
     }
 
     public static final int PAY_WX = 1, PAY_ALI = 2;
