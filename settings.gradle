@@ -1,1 +1,1 @@
-include ':app', ':micro_mall', ':galleryfinal'
+include ':app', ':micro_mall'

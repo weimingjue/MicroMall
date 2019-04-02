@@ -1,6 +1,5 @@
 package com.glela.micro_mall.activity;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -11,6 +10,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,22 +21,15 @@ import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.glela.micro_mall.BuildConfig;
 import com.glela.micro_mall.R;
 import com.glela.micro_mall.base.BaseActivity;
 import com.glela.micro_mall.base.BaseWebView;
 import com.glela.micro_mall.interfaceabstract.IUiController;
-import com.glela.micro_mall.interfaceabstract.OnOkCancelClickListener;
-import com.glela.micro_mall.utils.PermissionUtil;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.List;
-
-import cn.finalteam.galleryfinal.GalleryFinal;
-import cn.finalteam.galleryfinal.model.PhotoInfo;
 
 public class GlelaWebActivity extends BaseActivity {
 
@@ -46,7 +39,7 @@ public class GlelaWebActivity extends BaseActivity {
      * @param companyId 协商的公司Id
      * @param listener  当拉起支付时会回调此方法
      */
-    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, OnWebListener listener) {
+    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, @NonNull OnWebListener listener) {
         if (TextUtils.isEmpty(appId) || TextUtils.isEmpty(appId) || TextUtils.isEmpty(companyId)) {
             throw new RuntimeException("appId：" + appId + "userId：" + userId + "companyId：" + companyId + "为必传项");
         }
@@ -175,9 +168,10 @@ public class GlelaWebActivity extends BaseActivity {
                 public void run() {
                     int payType = Integer.parseInt(payWay);
                     if (mGlobalWebListener != null) {
-                        mGlobalWebListener.onPay(payType, orderSn, new OnThirdResultListener() {
+                        mGlobalWebListener.onPay(mController.getActivity(), payType, orderSn, new OnThirdResultListener() {
                             @Override
                             public void onPayonPayResult(int payType, int status) {
+                                super.onPayonPayResult(payType, status);
                                 if (mController instanceof GlelaWebActivity) {
                                     ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
                                 }
@@ -195,11 +189,11 @@ public class GlelaWebActivity extends BaseActivity {
      */
     public static class BaseWebChromeClient extends BaseWebView.MyWebChromeClient {
 
-        private final IUiController mActivity;
+        private final IUiController mController;
 
-        public BaseWebChromeClient(IUiController activity, BaseWebView bwv) {
+        public BaseWebChromeClient(IUiController controller, BaseWebView bwv) {
             super(bwv);
-            mActivity = activity;
+            mController = controller;
         }
 //
 //        /**
@@ -218,33 +212,15 @@ public class GlelaWebActivity extends BaseActivity {
          * <4.4和4.4.3,如果使用混淆必须忽略此方法,不然会被混淆掉导致无法回调
          */
         public void openFileChooser(final ValueCallback<Uri> uploadFile, String acceptType, String capture) {
-            PermissionUtil.checkPermission(mActivity, "申请开启相机权限",
-                    new OnOkCancelClickListener<Void, Void>() {
-                        @Override
-                        public void clickOk(Void strings, Void aVoid) {
-                            GalleryFinal.openGalleryMuti(997, 1, new GalleryFinal.OnHanlderResultCallback() {
-                                @Override
-                                public void onHanlderSuccess(int reqeustCode, List<PhotoInfo> resultList) {
-                                    if (997 != reqeustCode || resultList == null || resultList.size() == 0) {
-                                        uploadFile.onReceiveValue(null);
-                                        return;
-                                    }
-                                    uploadFile.onReceiveValue(Uri.parse(resultList.get(0).getPhotoPath()));
-                                }
-
-                                @Override
-                                public void onHanlderFailure(int requestCode, String errorMsg) {
-                                    uploadFile.onReceiveValue(null);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void clickCancel(Void strings) {
-                            uploadFile.onReceiveValue(null);
-                            Toast.makeText(mActivity.getBaseActivity(), "权限拒绝,无法开启!", Toast.LENGTH_SHORT).show();
-                        }
-                    }, Manifest.permission.CAMERA);
+            if (mGlobalWebListener != null) {
+                mGlobalWebListener.onPhotoSelect(mController.getActivity(), new OnThirdResultListener() {
+                    @Override
+                    public void onPhotoResult(String path) {
+                        super.onPhotoResult(path);
+                        uploadFile.onReceiveValue(TextUtils.isEmpty(path) ? null : Uri.parse(path));
+                    }
+                });
+            }
         }
 
         //4.4,4.4.1,4.4.2无解,可以尝试第三方webView或js回调来解决这问题
@@ -255,33 +231,15 @@ public class GlelaWebActivity extends BaseActivity {
         @TargetApi(21)
         @Override
         public boolean onShowFileChooser(WebView webView, final ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-            PermissionUtil.checkPermission(mActivity, "申请开启相机权限",
-                    new OnOkCancelClickListener<Void, Void>() {
-                        @Override
-                        public void clickOk(Void strings, Void aVoid) {
-                            GalleryFinal.openGalleryMuti(997, 1, new GalleryFinal.OnHanlderResultCallback() {
-                                @Override
-                                public void onHanlderSuccess(int reqeustCode, List<PhotoInfo> resultList) {
-                                    if (997 != reqeustCode || resultList == null || resultList.size() == 0) {
-                                        filePathCallback.onReceiveValue(null);
-                                        return;
-                                    }
-                                    filePathCallback.onReceiveValue(new Uri[]{getMediaContentUri(resultList.get(0).getPhotoPath())});
-                                }
-
-                                @Override
-                                public void onHanlderFailure(int requestCode, String errorMsg) {
-                                    filePathCallback.onReceiveValue(null);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void clickCancel(Void strings) {
-                            filePathCallback.onReceiveValue(null);
-                            Toast.makeText(mActivity.getBaseActivity(), "权限拒绝,无法开启!", Toast.LENGTH_SHORT).show();
-                        }
-                    }, Manifest.permission.CAMERA);
+            if (mGlobalWebListener != null) {
+                mGlobalWebListener.onPhotoSelect(mController.getActivity(), new OnThirdResultListener() {
+                    @Override
+                    public void onPhotoResult(String path) {
+                        super.onPhotoResult(path);
+                        filePathCallback.onReceiveValue(TextUtils.isEmpty(path) ? null : new Uri[]{getMediaContentUri(path)});
+                    }
+                });
+            }
             return true;
         }
 
@@ -302,16 +260,16 @@ public class GlelaWebActivity extends BaseActivity {
             // 赋值给callback
             mCustomViewCallback = callback;
             // 声明video，把之后的视频放到这里面去
-            ViewGroup p = (ViewGroup) mActivity.getActivity().getWindow().getDecorView();
+            ViewGroup p = (ViewGroup) mController.getActivity().getWindow().getDecorView();
             // 将video放到当前视图中
             mVideoView = view;
             view.setBackgroundColor(0xffffffff);
             p.addView(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             // 横屏显示
-            mActivity.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            mController.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             // 设置全屏
             // 设置全屏的相关属性，获取当前的屏幕状态，然后设置全屏
-            mActivity.getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            mController.getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             // 全屏下的状态码：1098974464
             // 窗口下的状态吗：1098973440
@@ -328,7 +286,7 @@ public class GlelaWebActivity extends BaseActivity {
                     }
                 };
             }
-            mActivity.addUiStatusChangedListener(mStatusListener);//添加事件拦截key来退出全屏
+            mController.addUiStatusChangedListener(mStatusListener);//添加事件拦截key来退出全屏
         }
 
         /**
@@ -342,17 +300,17 @@ public class GlelaWebActivity extends BaseActivity {
                 mCustomViewCallback = null;
             }
             // 用户当前的首选方向
-            mActivity.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            ViewGroup p = (ViewGroup) mActivity.getActivity().getWindow().getDecorView();
+            mController.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            ViewGroup p = (ViewGroup) mController.getActivity().getWindow().getDecorView();
             p.removeView(mVideoView);
             mVideoView = null;
-            mActivity.removeUiStatusChangedListener(mStatusListener);
+            mController.removeUiStatusChangedListener(mStatusListener);
             // 退出全屏
             // 声明当前屏幕状态的参数并获取
-            final WindowManager.LayoutParams attrs = mActivity.getActivity().getWindow().getAttributes();
+            final WindowManager.LayoutParams attrs = mController.getActivity().getWindow().getAttributes();
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            mActivity.getActivity().getWindow().setAttributes(attrs);
-            mActivity.getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            mController.getActivity().getWindow().setAttributes(attrs);
+            mController.getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
         /**
@@ -361,7 +319,7 @@ public class GlelaWebActivity extends BaseActivity {
         private Uri getMediaContentUri(String absolutePath) {
             Uri newUri;
 //      先查找是否有这个uri
-            Cursor cursor = mActivity.getBaseActivity().getContentResolver().query(
+            Cursor cursor = mController.getBaseActivity().getContentResolver().query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Images.Media._ID},
                     MediaStore.Images.Media.DATA + "=? ",
@@ -372,7 +330,7 @@ public class GlelaWebActivity extends BaseActivity {
             } else {
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Images.Media.DATA, absolutePath);
-                newUri = mActivity.getBaseActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                newUri = mController.getBaseActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             }
             if (cursor != null)
                 cursor.close();
@@ -386,15 +344,36 @@ public class GlelaWebActivity extends BaseActivity {
 
     public interface OnWebListener {
         /**
+         * @param activity 当前Activity
          * @param payType  支付方式，见注解
          * @param orderSn  订单号，支付的唯一标识
-         * @param listener 当支付有结果时请调用此方法
+         * @param listener 当支付有结果时请调用{@link OnThirdResultListener#onPayonPayResult}
          */
-        void onPay(@pay int payType, String orderSn, OnThirdResultListener listener);
+        void onPay(Activity activity, @pay int payType, String orderSn, OnThirdResultListener listener);
+
+        /**
+         * @param listener 当选择完图片时请调用{@link OnThirdResultListener#onPhotoResult}
+         */
+        void onPhotoSelect(Activity activity, OnThirdResultListener listener);
     }
 
-    public interface OnThirdResultListener {
-        void onPayonPayResult(@pay int payType, int status);
+    public static abstract class OnThirdResultListener {
+        /**
+         * 当支付有结果时必须回调此方法
+         *
+         * @param payType 支付类型
+         * @param status  支付结果：0失败，1成功
+         */
+        public void onPayonPayResult(@pay int payType, int status) {
+        }
+
+        /**
+         * 当选择完图片时
+         *
+         * @param path 图片的绝对路径，如果取消请传null
+         */
+        public void onPhotoResult(@Nullable String path) {
+        }
     }
 
     public static final int PAY_WX = 1, PAY_ALI = 2;
