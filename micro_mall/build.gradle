@@ -20,4 +20,7 @@ dependencies {
     //黄油刀
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.6.0'
+    implementation 'com.squareup.okio:okio:1.6.0'
+    implementation 'com.alibaba:fastjson:1.1.70.android'
 }

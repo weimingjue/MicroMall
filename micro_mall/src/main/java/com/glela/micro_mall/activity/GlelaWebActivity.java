@@ -2,13 +2,11 @@ package com.glela.micro_mall.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.IntDef;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -26,11 +24,22 @@ import com.glela.micro_mall.BuildConfig;
 import com.glela.micro_mall.R;
 import com.glela.micro_mall.base.BaseActivity;
 import com.glela.micro_mall.base.BaseWebView;
+import com.glela.micro_mall.base.GlelaUrls;
+import com.glela.micro_mall.base.MapUtils;
+import com.glela.micro_mall.bean.WXCode;
+import com.glela.micro_mall.bean.ZFBCode;
 import com.glela.micro_mall.interfaceabstract.IUiController;
+import com.glela.micro_mall.interfaceabstract.OKHttpListener;
+import com.glela.micro_mall.utils.GlelaHttpUtils;
+import com.glela.micro_mall.utils.GlelaUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
+@Keep
 public class GlelaWebActivity extends BaseActivity {
 
     /**
@@ -95,7 +104,7 @@ public class GlelaWebActivity extends BaseActivity {
             }
         });
 
-        mBwv.loadUrl("http://h5.test.glela.cn/h5_jiFen/?" + "thirdAppId=" + mAppId + "&thirdUserId=" + mUserId + "&companyId=" + mCompanyId);
+        mBwv.loadUrl(GlelaUrls.WEB_HOME + "thirdAppId=" + mAppId + "&thirdUserId=" + mUserId + "&companyId=" + mCompanyId);
     }
 
     @Override
@@ -122,6 +131,7 @@ public class GlelaWebActivity extends BaseActivity {
     /**
      * js回调类
      */
+    @Keep
     public static class JSClass {
 
         private final IUiController mController;
@@ -158,25 +168,53 @@ public class GlelaWebActivity extends BaseActivity {
         /**
          * h5根据订单号请求支付
          *
-         * @param payWay  支付方式
+         * @param payWay  支付方式:1微信，2支付宝
          * @param orderSn 订单号
          */
         @JavascriptInterface
-        public void requestPaySupportWithPayWay(final String payWay, final String orderSn) {
+        public void requestPaySupportWithPayWay(final String payWay, final String orderSn, final String userId, final String userToken) {
             mController.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    int payType = Integer.parseInt(payWay);
-                    if (mGlobalWebListener != null) {
-                        mGlobalWebListener.onPay(mController.getActivity(), payType, orderSn, new OnThirdResultListener() {
-                            @Override
-                            public void onPayonPayResult(int payType, int status) {
-                                super.onPayonPayResult(payType, status);
-                                if (mController instanceof GlelaWebActivity) {
-                                    ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
-                                }
+                    final int payType = Integer.parseInt(payWay);
+                    //入参
+                    MapUtils map = MapUtils.getHttpInstance().put("orderSn", orderSn).put("payType", payType).put(GlelaHttpUtils.KEY_USERID, Long.parseLong(userId));
+                    //请求体
+                    final Request.Builder request = new Request.Builder().post(RequestBody.create(GlelaHttpUtils.mMediaType, map.toString())).addHeader(GlelaHttpUtils.KEY_USERTOKEN, userToken);
+                    //回调
+                    final OnThirdResultListener resultListener = new OnThirdResultListener() {
+                        @Override
+                        public void onPayResult(int status) {
+                            super.onPayResult(status);
+                            if (mController instanceof GlelaWebActivity) {
+                                ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
                             }
-                        });
+                        }
+                    };
+                    //请求获取支付信息
+                    switch (payType) {
+                        case PAY_WX:
+                            GlelaHttpUtils.httpCustom(mController, GlelaUrls.PAY_WX, request, WXCode.WXCodeData.class, GlelaHttpUtils.mClient, new OKHttpListener<WXCode.WXCodeData>() {
+                                @Override
+                                public void onSuccess(WXCode.WXCodeData bean) {
+                                    if (mGlobalWebListener != null) {
+                                        mGlobalWebListener.onWxPay(mController.getActivity(), bean.data, resultListener);
+                                    }
+                                }
+                            });
+                            break;
+                        case PAY_ALI:
+                            GlelaHttpUtils.httpCustom(mController, GlelaUrls.PAY_ALI, request, ZFBCode.ZFBCodeData.class, GlelaHttpUtils.mClient, new OKHttpListener<ZFBCode.ZFBCodeData>() {
+                                @Override
+                                public void onSuccess(ZFBCode.ZFBCodeData bean) {
+                                    if (mGlobalWebListener != null) {
+                                        mGlobalWebListener.onAliPay(mController.getActivity(), bean.data.url_param, resultListener);
+                                    }
+                                }
+                            });
+                            break;
+                        default:
+                            break;
                     }
                 }
             });
@@ -187,6 +225,7 @@ public class GlelaWebActivity extends BaseActivity {
      * WebChromeClient类
      * 增加上传返回图片
      */
+    @Keep
     public static class BaseWebChromeClient extends BaseWebView.MyWebChromeClient {
 
         private final IUiController mController;
@@ -236,7 +275,7 @@ public class GlelaWebActivity extends BaseActivity {
                     @Override
                     public void onPhotoResult(String path) {
                         super.onPhotoResult(path);
-                        filePathCallback.onReceiveValue(TextUtils.isEmpty(path) ? null : new Uri[]{getMediaContentUri(path)});
+                        filePathCallback.onReceiveValue(TextUtils.isEmpty(path) ? null : new Uri[]{GlelaUtils.getMediaContentUri(mController.getBaseActivity(), path)});
                     }
                 });
             }
@@ -312,30 +351,6 @@ public class GlelaWebActivity extends BaseActivity {
             mController.getActivity().getWindow().setAttributes(attrs);
             mController.getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
-
-        /**
-         * 获取媒体的uri
-         */
-        private Uri getMediaContentUri(String absolutePath) {
-            Uri newUri;
-//      先查找是否有这个uri
-            Cursor cursor = mController.getBaseActivity().getContentResolver().query(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Images.Media._ID},
-                    MediaStore.Images.Media.DATA + "=? ",
-                    new String[]{absolutePath}, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                newUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
-            } else {
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.DATA, absolutePath);
-                newUri = mController.getBaseActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            }
-            if (cursor != null)
-                cursor.close();
-            return newUri;
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,11 +360,11 @@ public class GlelaWebActivity extends BaseActivity {
     public interface OnWebListener {
         /**
          * @param activity 当前Activity
-         * @param payType  支付方式，见注解
-         * @param orderSn  订单号，支付的唯一标识
-         * @param listener 当支付有结果时请调用{@link OnThirdResultListener#onPayonPayResult}
+         * @param listener 当支付有结果时请调用{@link OnThirdResultListener#onPayResult}
          */
-        void onPay(Activity activity, @pay int payType, String orderSn, OnThirdResultListener listener);
+        void onWxPay(Activity activity, WXCode wxCode, OnThirdResultListener listener);
+
+        void onAliPay(Activity activity, String payData, OnThirdResultListener listener);
 
         /**
          * @param listener 当选择完图片时请调用{@link OnThirdResultListener#onPhotoResult}
@@ -361,10 +376,9 @@ public class GlelaWebActivity extends BaseActivity {
         /**
          * 当支付有结果时必须回调此方法
          *
-         * @param payType 支付类型
-         * @param status  支付结果：0失败，1成功
+         * @param status 支付结果：0失败，1成功
          */
-        public void onPayonPayResult(@pay int payType, int status) {
+        public void onPayResult(int status) {
         }
 
         /**

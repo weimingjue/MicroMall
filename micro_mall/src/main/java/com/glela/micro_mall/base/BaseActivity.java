@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import com.glela.micro_mall.GlelaWebUtil;
 import com.glela.micro_mall.interfaceabstract.IUiController;
 
 import java.lang.annotation.Retention;
@@ -198,6 +199,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IUiContr
     @Override
     protected final void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (GlelaWebUtil.mGlelaApp == null) GlelaWebUtil.mGlelaApp = getApplication();
         if (getRequestedOrientation() < 0) {//没有就默认竖屏,有就跳过
             throw new RuntimeException("必须在xml中配置android:screenOrientation=\"${SCREENORIENTATION}\"");
         }
