@@ -1,8 +1,8 @@
 package com.glela.micro_mall.base;
 
 public interface GlelaUrls {
-//    String HTTP_HEADER = "http://api.app.glela.com/yg_ygapp";
-    String HTTP_HEADER = "http://api.test.app.glela.cn/yg_ygapp";
+    String HTTP_HEADER = "http://api.app.glela.com/yg_ygapp";
+//    String HTTP_HEADER = "http://api.test.app.glela.cn/yg_ygapp";
 
 
     String WEB_HOME = "http://h5.test.glela.cn/h5_jiFen/?";
