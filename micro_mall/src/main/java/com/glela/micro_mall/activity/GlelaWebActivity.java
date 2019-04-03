@@ -47,8 +47,10 @@ public class GlelaWebActivity extends BaseActivity {
      * @param userId    协商的用户Id
      * @param companyId 协商的公司Id
      * @param listener  当拉起支付时会回调此方法
+     * @param lat       sdk需要位置信息
+     * @param lng       sdk需要位置信息
      */
-    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, @NonNull OnWebListener listener) {
+    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, double lat, double lng, @NonNull OnWebListener listener) {
         if (TextUtils.isEmpty(appId) || TextUtils.isEmpty(appId) || TextUtils.isEmpty(companyId)) {
             throw new RuntimeException("appId：" + appId + "userId：" + userId + "companyId：" + companyId + "为必传项");
         }
@@ -56,7 +58,9 @@ public class GlelaWebActivity extends BaseActivity {
         activity.startActivity(new Intent(activity, GlelaWebActivity.class)
                 .putExtra(I_A, appId)
                 .putExtra(I_B, userId)
-                .putExtra(I_C, companyId));
+                .putExtra(I_C, companyId)
+                .putExtra(I_D, lat)
+                .putExtra(I_E, lng));
     }
 
     /**
@@ -65,6 +69,8 @@ public class GlelaWebActivity extends BaseActivity {
     private static OnWebListener mGlobalWebListener;
 
     private String mAppId, mUserId, mCompanyId;
+
+    private double mLat, mLng;
 
     private ImageView mIvBack;
     private TextView mTvTitle;
@@ -81,6 +87,8 @@ public class GlelaWebActivity extends BaseActivity {
         mAppId = getIntent().getStringExtra(I_A);
         mUserId = getIntent().getStringExtra(I_B);
         mCompanyId = getIntent().getStringExtra(I_C);
+        mLat = getIntent().getDoubleExtra(I_D, 0);
+        mLng = getIntent().getDoubleExtra(I_E, 0);
 
         mIvBack = findViewById(R.id.iv_glelaweb_back);
         mTvTitle = findViewById(R.id.tv_glelaweb_title);
@@ -104,7 +112,8 @@ public class GlelaWebActivity extends BaseActivity {
             }
         });
 
-        mBwv.loadUrl(GlelaUrls.WEB_HOME + "thirdAppId=" + mAppId + "&thirdUserId=" + mUserId + "&companyId=" + mCompanyId);
+        mBwv.loadUrl(GlelaUrls.WEB_HOME + "thirdAppId=" + mAppId + "&thirdUserId=" + mUserId +
+                "&companyId=" + mCompanyId + "&lat=" + mLat + "&lng=" + mLng);
     }
 
     @Override
