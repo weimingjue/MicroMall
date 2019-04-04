@@ -106,5 +106,8 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
 `implementation（或api） 'com.github.weimingjue:MicroMall:0.96'`
 
 ## 混淆相关
-如果使用的是android的Proguard则不需要额外增加混淆逻辑（一键不混淆其他所有第三方可以参考：https://blog.csdn.net/weimingjue/article/details/84976058
+如果使用的是android的Proguard则不需要额外增加混淆逻辑
+
+（一次性不混淆所有第三方可以参考：https://blog.csdn.net/weimingjue/article/details/84976058 ）
+
 如果是其他混淆框架：不混淆GlelaWebActivity整个类、内部类及其属性即可
