@@ -185,7 +185,7 @@ public class GlelaWebActivity extends BaseActivity {
             mController.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final int payType = Integer.parseInt(payWay);
+                    int payType = Integer.parseInt(payWay);
                     //入参
                     MapUtils map = MapUtils.getHttpInstance().put("orderSn", orderSn).put("payType", payType).put(GlelaHttpUtils.KEY_USERID, Long.parseLong(userId));
                     //请求体
@@ -196,7 +196,7 @@ public class GlelaWebActivity extends BaseActivity {
                         public void onPayResult(int status) {
                             super.onPayResult(status);
                             if (mController instanceof GlelaWebActivity) {
-                                ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + payType + "," + status + ")");
+                                ((GlelaWebActivity) mController).mBwv.loadUrl("javascript:payResultWithPayWay(" + status + ")");
                             }
                         }
                     };
