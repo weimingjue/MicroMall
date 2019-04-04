@@ -103,4 +103,4 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
     }
 ```
 然后导入
-`implementation（或api） 'com.github.weimingjue:MicroMall:0.93'`
+`implementation（或api） 'com.github.weimingjue:MicroMall:0.95'`
