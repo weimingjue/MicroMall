@@ -4,7 +4,7 @@ public interface GlelaUrls {
     /**
      * 0正式，1测试
      */
-    int HEADER_POSITION = 1;
+    int HEADER_POSITION = 0;
     String[][] HEADERS = {{"正式", "http://api.app.glela.com/yg_ygapp", "http://app.h5.glela.com/"},
             {"测试", "http://api.test.app.glela.cn/yg_ygapp", "http://h5.test.glela.cn/"}};
 
