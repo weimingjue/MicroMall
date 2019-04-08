@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
-import butterknife.ButterKnife;
-
 /**
  * 所有activity的基类
  * 界面跳转标准写法,fragment同理
@@ -210,7 +208,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IUiContr
         if (layouRes > 0) {
             setContentView(layouRes);
         }
-        ButterKnife.bind(this);//注册黄油刀
+//        ButterKnife.bind(this);//注册黄油刀
         initData();
         setListener();
 
