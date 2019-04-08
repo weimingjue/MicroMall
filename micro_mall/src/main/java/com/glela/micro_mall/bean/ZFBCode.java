@@ -4,9 +4,6 @@ import com.glela.micro_mall.base.BaseBean;
 
 import java.io.Serializable;
 
-/**
- * Created by glela on 2016/11/7.
- */
 public class ZFBCode implements Serializable {
 
     public static class ZFBCodeData extends BaseBean {
@@ -27,5 +24,5 @@ public class ZFBCode implements Serializable {
     public String it_b_pay;
     public String sign;
     public String sign_type;
-    public String url_param;//已经拼接好的数据
+    public String url_param;//已经拼接好的数据，直接使用此值即可
 }
