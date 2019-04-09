@@ -103,7 +103,7 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
     }
 ```
 然后导入
-`implementation（或api） 'com.github.weimingjue:MicroMall:0.98'`
+`implementation（或api） 'com.github.weimingjue:MicroMall:0.981'`
 
 测试环境在版本前面加上T即可（发版时别忘了改回来）
 
