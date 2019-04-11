@@ -17,7 +17,6 @@ import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.glela.micro_mall.BuildConfig;
@@ -47,10 +46,13 @@ public class GlelaWebActivity extends BaseActivity {
      * @param userId    协商的用户Id
      * @param companyId 协商的公司Id
      * @param listener  当拉起支付时会回调此方法
+     * @param timestamp 生成签名时的时间戳
+     * @param sign      签名
      * @param lat       sdk需要位置信息
      * @param lng       sdk需要位置信息
      */
-    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, double lat, double lng, @NonNull OnWebListener listener) {
+    public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, long timestamp,
+                                      String sign, double lat, double lng, @NonNull OnWebListener listener) {
         if (TextUtils.isEmpty(appId) || TextUtils.isEmpty(appId) || TextUtils.isEmpty(companyId)) {
             throw new RuntimeException("appId：" + appId + "userId：" + userId + "companyId：" + companyId + "为必传项");
         }
@@ -59,8 +61,10 @@ public class GlelaWebActivity extends BaseActivity {
                 .putExtra(I_A, appId)
                 .putExtra(I_B, userId)
                 .putExtra(I_C, companyId)
-                .putExtra(I_D, lat)
-                .putExtra(I_E, lng));
+                .putExtra(I_D, timestamp)
+                .putExtra(I_E, sign)
+                .putExtra(I_F, lat)
+                .putExtra(I_G, lng));
     }
 
     /**
@@ -68,11 +72,6 @@ public class GlelaWebActivity extends BaseActivity {
      */
     private static OnWebListener mGlobalWebListener;
 
-    private String mAppId, mUserId, mCompanyId;
-
-    private double mLat, mLng;
-
-    private ImageView mIvBack;
     private TextView mTvTitle;
     private BaseWebView mBwv;
 
@@ -84,22 +83,9 @@ public class GlelaWebActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        mAppId = getIntent().getStringExtra(I_A);
-        mUserId = getIntent().getStringExtra(I_B);
-        mCompanyId = getIntent().getStringExtra(I_C);
-        mLat = getIntent().getDoubleExtra(I_D, 0);
-        mLng = getIntent().getDoubleExtra(I_E, 0);
-
-        mIvBack = findViewById(R.id.iv_glelaweb_back);
         mTvTitle = findViewById(R.id.tv_glelaweb_title);
         mBwv = findViewById(R.id.bwv_glelaweb);
 
-        mIvBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
         mTvTitle.setText("商城");
 
         //添加js
@@ -112,12 +98,25 @@ public class GlelaWebActivity extends BaseActivity {
             }
         });
 
-        mBwv.loadUrl(GlelaUrls.WEB_HOME + "thirdAppId=" + mAppId + "&thirdUserId=" + mUserId +
-                "&companyId=" + mCompanyId + "&lat=" + mLat + "&lng=" + mLng);
+        String appId = getIntent().getStringExtra(I_A);
+        String userId = getIntent().getStringExtra(I_B);
+        String companyId = getIntent().getStringExtra(I_C);
+        long timestamp = getIntent().getLongExtra(I_D, 0L);
+        String sign = getIntent().getStringExtra(I_E);
+        double lat = getIntent().getDoubleExtra(I_F, 0);
+        double lng = getIntent().getDoubleExtra(I_G, 0);
+        mBwv.loadUrl(GlelaUrls.WEB_HOME + "thirdAppId=" + appId + "&thirdUserId=" + userId + "&companyId=" + companyId +
+                "&timestamp=" + timestamp + "&sign=" + sign + "&lat=" + lat + "&lng=" + lng);
     }
 
     @Override
     protected void setListener() {
+        findViewById(R.id.iv_glelaweb_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
     }
 
     @Override
