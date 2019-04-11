@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //测试代码
-        GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21", 1d, 1d,
+        GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21", 999L, "测试", 1d, 1d,
                 new GlelaWebActivity.OnWebListener() {
 
                     @Override
