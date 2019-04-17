@@ -42,14 +42,7 @@ import okhttp3.RequestBody;
 public class GlelaWebActivity extends BaseActivity {
 
     /**
-     * @param appId     协商的appId
-     * @param userId    协商的用户Id
-     * @param companyId 协商的公司Id
-     * @param listener  当拉起支付时会回调此方法
-     * @param timestamp 生成签名时的时间戳
-     * @param sign      签名
-     * @param lat       sdk需要位置信息
-     * @param lng       sdk需要位置信息
+     * 见{@link com.glela.micro_mall.GlelaWebUtil#toWebActivity}
      */
     public static void toThisActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, long timestamp,
                                       String sign, double lat, double lng, @NonNull OnWebListener listener) {

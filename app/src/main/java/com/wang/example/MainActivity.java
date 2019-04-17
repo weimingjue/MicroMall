@@ -14,6 +14,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //在调用任何商城代码之前，只需要设置一次
+//        if (BuildConfig.DEBUG) {
+            GlelaWebUtil.setDebug();//设置为测试环境
+//        }
         //测试代码
         GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21", 999L, "测试", 1d, 1d,
                 new GlelaWebActivity.OnWebListener() {

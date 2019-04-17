@@ -7,13 +7,13 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
-import com.glela.micro_mall.GlelaWebUtil;
+import com.glela.micro_mall.base.GlelaStatics;
 
 public class GlelaUtils {
 
     public static void toast(CharSequence cs) {
-        if (GlelaWebUtil.mGlelaApp != null) {
-            Toast.makeText(GlelaWebUtil.mGlelaApp, cs, Toast.LENGTH_SHORT).show();
+        if (GlelaStatics.mGlelaApp != null) {
+            Toast.makeText(GlelaStatics.mGlelaApp, cs, Toast.LENGTH_SHORT).show();
         }
     }
 

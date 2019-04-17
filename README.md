@@ -1,7 +1,7 @@
 # 供第三方使用，示例如下
 
 ```
-GlelaWebUtil.toWebActivity("activity", "商定的appId", "商定的用户Id", "商定的公司Id", "定位的lat", "定位的lng", new GlelaWebActivity.OnWebListener() {
+GlelaWebUtil.toWebActivity("activity", "商定的appId", "商定的用户Id", "商定的公司Id", "签名时间戳", "签名", "定位的lat", "定位的lng", new GlelaWebActivity.OnWebListener() {
     @Override
     public void onWxPay(Activity activity, WXCode wxCode, GlelaWebActivity.OnThirdResultListener listener) {
         //拉起微信支付，wxCode里面的内容为微信支付必需的数据，对应值见博客：https://blog.csdn.net/weimingjue/article/details/80047273
@@ -26,7 +26,7 @@ GlelaWebUtil.toWebActivity("activity", "商定的appId", "商定的用户Id", "�
 //首先申请获取定位loaction数据
 //...
 //然后调用util跳到web界面
-GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
+GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",, 1111111111,, "xyz",
         loaction.getLatitude(), loaction.getLongitude(), new GlelaWebActivity.OnWebListener() {
 
             @Override
@@ -92,6 +92,13 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
             }
         });
 ```
+使用测试环境
+```
+        //在调用任何商城代码之前，只需要设置一次
+//        if (BuildConfig.DEBUG) {
+            GlelaWebUtil.setDebug();//设置为测试环境
+//        }
+```
 ## 导入方式
 你的build.gradle要有jitpack.io，大致如下
 ```
@@ -103,9 +110,7 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",
     }
 ```
 然后导入
-`implementation（或api） 'com.github.weimingjue:MicroMall:0.982'`
-
-测试环境在版本前面加上T即可（发版时别忘了改回来）
+`implementation（或api） 'com.github.weimingjue:MicroMall:0.983'`
 
 ## 混淆相关
 如果使用的是android的Proguard则不需要额外增加混淆逻辑
