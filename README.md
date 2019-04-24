@@ -94,7 +94,7 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",, 111111111
 ```
 使用测试环境
 ```
-        //在调用任何商城代码之前，只需要设置一次
+        //在调用任何商城代码之前，只需要设置一次，并且不可修改
 //        if (BuildConfig.DEBUG) {
             GlelaWebUtil.setDebug();//设置为测试环境
 //        }
