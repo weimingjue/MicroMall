@@ -110,7 +110,7 @@ GlelaWebUtil.toWebActivity(this, "z02", "b9x742dv602xmn7v3cn7", "21",, 111111111
     }
 ```
 然后导入
-`implementation（或api） 'com.github.weimingjue:MicroMall:0.983'`
+`implementation（或api） 'com.github.weimingjue:MicroMall:0.985'`
 
 ## 混淆相关
 如果使用的是android的Proguard则不需要额外增加混淆逻辑
