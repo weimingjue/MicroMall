@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import com.glela.micro_mall.activity.GlelaWebActivity;
 import com.glela.micro_mall.base.GlelaStatics;
 import com.glela.micro_mall.base.GlelaUrls;
+import com.glela.micro_mall.utils.GlelaUtils;
 
 public class GlelaWebUtil {
 
@@ -38,7 +39,12 @@ public class GlelaWebUtil {
      */
     public static void toWebActivity(Activity activity, @NonNull String appId, @NonNull String userId, String companyId, long timestamp,
                                      String sign, double lat, double lng, @NonNull GlelaWebActivity.OnWebListener listener) {
-        if (GlelaStatics.mGlelaApp == null) GlelaStatics.mGlelaApp = activity.getApplication();
+        if (GlelaStatics.mGlelaApp == null) {
+            GlelaStatics.mGlelaApp = activity.getApplication();
+        }
+        if (GlelaStatics.mModelPosition != 0) {
+            GlelaUtils.toast("当前为测试环境，正式环境不会提示这句");
+        }
         GlelaWebActivity.toThisActivity(activity, appId, userId, companyId, timestamp, sign, lat, lng, listener);
     }
 }
